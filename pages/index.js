@@ -1,6 +1,7 @@
 // pages/index.js
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+// We import useWallet but will only call it client‐side
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
@@ -8,9 +9,20 @@ export default function Home() {
   const router = useRouter();
   const { input, output, amount } = router.query;
 
-  const { publicKey, connected } = useWallet();
+  // Track if we are running on the client
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Only call useWallet() on the client (when mounted === true)
+  const { publicKey, connected } = mounted
+    ? useWallet()
+    : { publicKey: null, connected: false };
+
   const [errorMsg, setErrorMsg] = useState("");
 
+  // Validate query params once router is ready
   useEffect(() => {
     if (router.isReady) {
       if (!input || !output || !amount) {
@@ -23,6 +35,7 @@ export default function Home() {
     }
   }, [input, output, amount, router.isReady]);
 
+  // Build the Jupiter deep-link
   const getJupiterLink = () => {
     if (!connected || !input || !output || !amount) return "#";
     const params = new URLSearchParams({
@@ -56,10 +69,13 @@ export default function Home() {
             </p>
           </div>
 
-          {/* This button appears as “Connect Wallet” or the user’s publicKey once connected */}
-          <WalletMultiButton className="btn-primary" />
+          {/* 
+             WalletMultiButton will only render on the client once 'mounted' is true 
+             (because calling useWallet() on the server would throw). 
+          */}
+          {mounted && <WalletMultiButton className="btn-primary" />}
 
-          {connected && (
+          {mounted && connected && (
             <div className="swap-link">
               <a
                 href={getJupiterLink()}
