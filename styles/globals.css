@@ -1,10 +1,12 @@
-/* Import uploaded CSS */
+/* styles/globals.css */
+
+/* Import uploaded theme files */
 @import url("/style.css");
 @import url("/animate.min.css");
 @import url("/responsive.css");
 @import url("/custom-animate.css");
 
-/* Base styling overrides */
+/* Override / base styling */
 body {
   background: #0f0f0f;
   color: #e0e0e0;
@@ -21,6 +23,7 @@ body {
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
   position: relative;
   overflow: hidden;
+  animation: fadeInDown 1s ease-out;
 }
 
 .logo-container {
