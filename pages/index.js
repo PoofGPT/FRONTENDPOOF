@@ -34,7 +34,6 @@ export default function Home() {
 
   return (
     <div className="main-container animated fadeInDown">
-      {/* Logo + Title */}
       <div className="logo-container">
         <img src="/phantom-logo.svg" alt="Phantom Logo" className="logo" />
         <h1 className="site-title">SolanaGPT Swap</h1>
@@ -44,7 +43,6 @@ export default function Home() {
         <div className="error-box">{errorMsg}</div>
       ) : (
         <>
-          {/* Display the swap details */}
           <div className="info-box">
             <p>
               <strong>Input Mint:</strong> {input}
@@ -57,17 +55,11 @@ export default function Home() {
             </p>
           </div>
 
-          {/* WalletMultiButton handles “Connect Wallet” */}
           <WalletMultiButton className="btn-primary" />
 
-          {/* Once connected, show “Swap in Jupiter” */}
           {connected && (
             <div className="swap-link">
-              <a
-                href={getJupiterLink()}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href={getJupiterLink()} target="_blank" rel="noopener noreferrer">
                 <button className="btn-primary">Swap in Jupiter</button>
               </a>
             </div>
