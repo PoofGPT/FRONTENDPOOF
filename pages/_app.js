@@ -1,15 +1,21 @@
+// pages/_app.js
 import "../styles/globals.css";
-import { FC, ReactNode, useMemo } from "react";
+
+// Solana Wallet Adapter imports
+import { useMemo } from "react";
 import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
-import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { PhantomWalletAdapter } from "@solana/wallet-adapter-wallets";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
+
+// Default styles for the Wallet Adapter UI
 require("@solana/wallet-adapter-react-ui/styles.css");
 
-const MyApp: FC<{ Component: any; pageProps: any }> = ({ Component, pageProps }) => {
-  const network = WalletAdapterNetwork.Mainnet;
+function MyApp({ Component, pageProps }) {
+  // Choose “mainnet-beta” or another cluster if needed
   const endpoint = process.env.NEXT_PUBLIC_SOLANA_RPC || "https://api.mainnet-beta.solana.com";
-  const wallets = useMemo(() => [new PhantomWalletAdapter()], [network]);
+
+  // Initialize the Phantom wallet adapter
+  const wallets = useMemo(() => [new PhantomWalletAdapter()], []);
 
   return (
     <ConnectionProvider endpoint={endpoint}>
@@ -20,6 +26,6 @@ const MyApp: FC<{ Component: any; pageProps: any }> = ({ Component, pageProps })
       </WalletProvider>
     </ConnectionProvider>
   );
-};
+}
 
 export default MyApp;
