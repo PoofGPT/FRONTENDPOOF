@@ -1,19 +1,13 @@
 {
-  "name": "next-solgpt-swap",
-  "version": "1.0.0",
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
-  },
   "dependencies": {
+    "@jup-ag/api": "^1.0.0",         // or the latest published version
+    "@solana/web3.js": "^1.83.0",
+    "@solana/wallet-adapter-base": "^0.9.16",
+    "@solana/wallet-adapter-react": "^0.18.3",
+    "@solana/wallet-adapter-react-ui": "^0.11.4",
+    "@solana/wallet-adapter-wallets": "^0.18.5",
     "next": "13.4.0",
     "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "@solana/web3.js": "*",
-    "@solana/wallet-adapter-base": "*",
-    "@solana/wallet-adapter-react": "*",
-    "@solana/wallet-adapter-react-ui": "*",
-    "@solana/wallet-adapter-wallets": "*"
+    "react-dom": "18.2.0"
   }
 }
