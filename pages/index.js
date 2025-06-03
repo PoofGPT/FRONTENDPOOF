@@ -1,12 +1,13 @@
+// pages/index.js
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { useWallet, WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
 export default function Home() {
   const router = useRouter();
   const { input, output, amount } = router.query;
 
-  const [walletConnected, setWalletConnected] = useState(false);
-  const [publicKey, setPublicKey] = useState(null);
+  const { publicKey, connected } = useWallet();
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
@@ -21,22 +22,8 @@ export default function Home() {
     }
   }, [input, output, amount, router.isReady]);
 
-  const connectPhantom = async () => {
-    if (window.solana && window.solana.isPhantom) {
-      try {
-        const resp = await window.solana.connect();
-        setWalletConnected(true);
-        setPublicKey(resp.publicKey.toString());
-      } catch (err) {
-        setErrorMsg("Phantom connection failed.");
-      }
-    } else {
-      setErrorMsg("Phantom wallet not found.");
-    }
-  };
-
   const getJupiterLink = () => {
-    if (!walletConnected || !input || !output || !amount) return "";
+    if (!connected || !input || !output || !amount) return "#";
     const params = new URLSearchParams({
       inputMint: input,
       outputMint: output,
@@ -47,6 +34,7 @@ export default function Home() {
 
   return (
     <div className="main-container animated fadeInDown">
+      {/* Logo + Title */}
       <div className="logo-container">
         <img src="/phantom-logo.svg" alt="Phantom Logo" className="logo" />
         <h1 className="site-title">SolanaGPT Swap</h1>
@@ -56,6 +44,7 @@ export default function Home() {
         <div className="error-box">{errorMsg}</div>
       ) : (
         <>
+          {/* Display swap details */}
           <div className="info-box">
             <p>
               <strong>Input Mint:</strong> {input}
@@ -68,19 +57,17 @@ export default function Home() {
             </p>
           </div>
 
-          <button
-            className="btn-primary"
-            disabled={walletConnected}
-            onClick={connectPhantom}
-          >
-            {walletConnected
-              ? `Connected: ${publicKey.slice(0, 6)}...`
-              : "Connect Phantom"}
-          </button>
+          {/* WalletMultiButton auto-handles “Connect” / “Disconnect” */}
+          <WalletMultiButton className="btn-primary" />
 
-          {walletConnected && (
+          {/* If connected, show the Swap in Jupiter button */}
+          {connected && (
             <div className="swap-link">
-              <a href={getJupiterLink()} target="_blank" rel="noopener noreferrer">
+              <a
+                href={getJupiterLink()}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <button className="btn-primary">Swap in Jupiter</button>
               </a>
             </div>
