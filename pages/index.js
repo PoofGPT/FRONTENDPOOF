@@ -1,7 +1,8 @@
 // pages/index.js
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { useWallet, WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
 export default function Home() {
   const router = useRouter();
@@ -55,11 +56,16 @@ export default function Home() {
             </p>
           </div>
 
+          {/* This button appears as “Connect Wallet” or the user’s publicKey once connected */}
           <WalletMultiButton className="btn-primary" />
 
           {connected && (
             <div className="swap-link">
-              <a href={getJupiterLink()} target="_blank" rel="noopener noreferrer">
+              <a
+                href={getJupiterLink()}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <button className="btn-primary">Swap in Jupiter</button>
               </a>
             </div>
