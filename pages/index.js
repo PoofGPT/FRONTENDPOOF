@@ -1,28 +1,30 @@
 // pages/index.js
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-// We import useWallet but will only call it client‐side
-import { useWallet } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { useWallet, WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { useWallet as useWalletHook } from "@solana/wallet-adapter-react";
+import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { ROUTER_ID, Jupiter } from "@jup-ag/core"; // Jupiter client
 
 export default function Home() {
   const router = useRouter();
   const { input, output, amount } = router.query;
 
-  // Track if we are running on the client
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Only call useWallet() on the client (when mounted === true)
-  const { publicKey, connected } = mounted
-    ? useWallet()
-    : { publicKey: null, connected: false };
+  // Only call useWallet once mounted
+  const { publicKey, connected, sendTransaction } = mounted
+    ? useWalletHook()
+    : { publicKey: null, connected: false, sendTransaction: null };
 
   const [errorMsg, setErrorMsg] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [txSignature, setTxSignature] = useState("");
 
-  // Validate query params once router is ready
+  // Validate query params
   useEffect(() => {
     if (router.isReady) {
       if (!input || !output || !amount) {
@@ -35,15 +37,68 @@ export default function Home() {
     }
   }, [input, output, amount, router.isReady]);
 
-  // Build the Jupiter deep-link
-  const getJupiterLink = () => {
-    if (!connected || !input || !output || !amount) return "#";
-    const params = new URLSearchParams({
-      inputMint: input,
-      outputMint: output,
-      amount,
-    });
-    return `https://jup.ag/swap?${params.toString()}`;
+  // Mainnet endpoint
+  const endpoint = process.env.NEXT_PUBLIC_SOLANA_RPC || "https://api.mainnet-beta.solana.com";
+  const connection = new Connection(endpoint);
+
+  // Handle the on‐chain swap
+  const doSwap = async () => {
+    try {
+      if (!connected || !publicKey) {
+        setErrorMsg("🦄 Please connect your wallet first.");
+        return;
+      }
+      setLoading(true);
+      setErrorMsg("");
+      setTxSignature("");
+
+      // 1) Prepare mints and amountRaw
+      const inputMintPub = new PublicKey(input);
+      const outputMintPub = new PublicKey(output);
+
+      // Convert human‐readable SOL (e.g. "3") to lamports if input is wrapped SOL
+      // If input is an SPL token, adjust decimals accordingly (not shown here).
+      const amountNumber = Number(amount);
+      const amountRaw = Math.round(amountNumber * LAMPORTS_PER_SOL).toString();
+
+      // 2) Initialize Jupiter
+      const jupiter = await Jupiter.load({
+        connection,
+        cluster: "mainnet-beta",
+        user: publicKey,
+      });
+
+      // 3) Find routes (0.5% slippage tolerance)
+      const routes = await jupiter.computeRoutes({
+        inputMint: inputMintPub.toString(),
+        outputMint: outputMintPub.toString(),
+        amount: amountRaw,
+        slippageBps: 50, // 0.5%
+      });
+      if (!routes || routes.routesInfos.length === 0) {
+        setErrorMsg("😵‍💫 No route found—try a different pair or amount.");
+        setLoading(false);
+        return;
+      }
+
+      // Pick the best route (first one)
+      const bestRoute = routes.routesInfos[0];
+
+      // 4) Build the swap transaction
+      const { swapTransaction } = await jupiter.exchange({
+        routeInfo: bestRoute,
+      });
+
+      // 5) Send & confirm
+      const signature = await sendTransaction(swapTransaction, connection);
+      await connection.confirmTransaction(signature, "confirmed");
+      setTxSignature(signature);
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("😵‍💫 Swap failed—try again?");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -69,21 +124,37 @@ export default function Home() {
             </p>
           </div>
 
-          {/* 
-             WalletMultiButton will only render on the client once 'mounted' is true 
-             (because calling useWallet() on the server would throw). 
-          */}
+          {/* Only render the connect button client-side */}
           {mounted && <WalletMultiButton className="btn-primary" />}
 
+          {/* Show “Swap Now” button when wallet connected */}
           {mounted && connected && (
             <div className="swap-link">
-              <a
-                href={getJupiterLink()}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                className="btn-primary"
+                onClick={doSwap}
+                disabled={loading}
               >
-                <button className="btn-primary">Swap in Jupiter</button>
-              </a>
+                {loading ? "…Swapping" : "Swap Now"}
+              </button>
+            </div>
+          )}
+
+          {/* Show transaction signature if swap succeeded */}
+          {txSignature && (
+            <div className="info-box">
+              <p>Swap succeeded!</p>
+              <p>
+                Signature:{" "}
+                <a
+                  href={`https://explorer.solana.com/tx/${txSignature}?cluster=mainnet-beta`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
+                  {txSignature.slice(0, 8)}…{txSignature.slice(-8)}
+                </a>
+              </p>
             </div>
           )}
         </>
