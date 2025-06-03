@@ -1,0 +1,88 @@
+/* Import uploaded CSS */
+@import url("/style.css");
+@import url("/animate.min.css");
+@import url("/responsive.css");
+@import url("/custom-animate.css");
+
+/* Base styling overrides */
+body {
+  background: #0f0f0f;
+  color: #e0e0e0;
+  margin: 0;
+  font-family: "Krub", sans-serif;
+}
+
+.main-container {
+  max-width: 600px;
+  margin: 80px auto;
+  padding: 2rem;
+  background: rgba(20, 20, 20, 0.9);
+  border-radius: 10px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+  margin-right: 0.5rem;
+}
+
+.site-title {
+  font-size: 2rem;
+  color: var(--thm-primary);
+  margin: 0;
+}
+
+.btn-primary {
+  background-color: var(--thm-primary) !important;
+  color: var(--thm-black) !important;
+  border: 2px solid var(--thm-primary) !important;
+  padding: 0.8rem 1.5rem !important;
+  font-weight: 700 !important;
+  border-radius: 6px !important;
+  text-transform: uppercase !important;
+  transition: all 0.3s ease-out !important;
+  cursor: pointer;
+  width: 100%;
+  font-size: 1rem;
+}
+
+.btn-primary:hover {
+  background: var(--thm-black) !important;
+  color: var(--thm-primary) !important;
+  border-color: var(--thm-black) !important;
+}
+
+.info-box {
+  background: #111;
+  border-left: 4px solid var(--thm-primary) !important;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  color: #f0f0f0;
+}
+
+.error-box {
+  background: #261b1b;
+  border-left: 4px solid #dc3545 !important;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  color: #ff4d4f;
+}
+
+.swap-link {
+  margin-top: 1.5rem;
+  text-align: center;
+}
